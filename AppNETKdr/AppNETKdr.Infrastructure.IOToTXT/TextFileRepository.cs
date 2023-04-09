@@ -18,7 +18,7 @@ namespace AppNETKdr.Infrastructure.IOToTXT
             {
                 return typeof(T).FullName.Replace(".", "") + "txt";
             }
-        } 
+        }
         #endregion
 
         #region Liste
@@ -45,14 +45,14 @@ namespace AppNETKdr.Infrastructure.IOToTXT
         {
             var jsonText = JsonSerializer.Serialize(list);
             File.WriteAllText(FileName, jsonText);
-        } 
+        }
         #endregion
 
         #region static Yapıcı Metod Sadece 1 Kere Çalışıcak
         static TextFileRepository()
         {
             LoadListFromFile();
-        } 
+        }
         #endregion
 
         public T Add(T entity)
@@ -68,7 +68,7 @@ namespace AppNETKdr.Infrastructure.IOToTXT
             LoadListFromFile();
             var entity = list.FirstOrDefault(x => x.Id == id);
             return entity;
-            
+
         }
 
         public ICollection<T> GetList(Func<T, bool> expression = null)
@@ -81,11 +81,31 @@ namespace AppNETKdr.Infrastructure.IOToTXT
         public bool Remove(int id)
         {
             LoadListFromFile();
+            var deletedEntity = list.FirstOrDefault(x => x.Id == id);
+            if (deletedEntity != null)
+            {
+                list.Remove(deletedEntity);
+                WriteListToTxt();
+                return true;
+            }
+            return false;
         }
 
         public T Update(int id, T entity)
         {
-            throw new NotImplementedException();
+            if (id != entity.Id)
+                throw new ArgumentException("Id değerleri uyuşmuyor");
+
+            LoadListFromFile();
+            var updated = list.FirstOrDefault(x => x.Id == id);
+            if (updated == null)
+                throw new ArgumentException("Güncellemek istenilen varlık bulnamadı");
+
+            list.Remove(updated);
+            list.Add(entity);
+            WriteListToTxt();
+            return entity;
+
         }
     }
 }
